@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - User 2</title>
+</head>
+<body>
+    <h1>Chat as User 2</h1>
+    <div id="chat-box" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll;">
+        <p><em>Connecting to chat...</em></p>
+    </div>
+    <input type="text" id="message-input" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        const ws = new WebSocket('ws://35.240.191.228:8080'); 
+
+        ws.onopen = () => {
+            console.log('Connected to WebSocket server as User 2');
+            appendMessage('Connected as User 2');
+        };
+
+        ws.onmessage = (event) => {
+            const { sender, message } = JSON.parse(event.data);
+            appendMessage(`${sender}: ${message}`);
+        };
+
+        ws.onclose = () => {
+            appendMessage('<em>Disconnected from WebSocket server</em>');
+        };
+
+        function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value;
+
+            if (message.trim()) {
+                const data = { channel_id: 'general', sender: 'User2', message };
+                ws.send(JSON.stringify(data));
+                messageInput.value = '';
+            }
+        }
+
+        function appendMessage(message) {
+            const chatBox = document.getElementById('chat-box');
+            const newMessage = document.createElement('p');
+            newMessage.innerHTML = message;
+            chatBox.appendChild(newMessage);
+            chatBox.scrollTop = chatBox.scrollHeight; 
+        }
+    </script>
+</body>
+</html>
