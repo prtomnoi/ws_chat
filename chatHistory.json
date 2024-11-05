@@ -1,0 +1,64 @@
+{
+  "general1": [
+    {
+      "sender": "User1",
+      "seed": 1,
+      "message": "Hello from User1!",
+      "see": false,
+      "status": false,
+      "read": false,
+      "created": "2024-11-05 23:23:23"
+    },
+    {
+      "sender": "User2",
+      "seed": 2,
+      "message": "Hi User1!",
+      "see": false,
+      "status": false,
+      "read": false,
+      "created": "2024-11-05 23:23:23"
+    },
+    {
+      "sender": "User2",
+      "seed": 2,
+      "message": "Hi User111!",
+      "see": false,
+      "status": false,
+      "read": false,
+      "created": "2024-11-05 23:23:23"
+    },
+    {
+      "sender": "User1",
+      "seed": 1,
+      "message": "Hello from User2!",
+      "see": false,
+      "status": false,
+      "read": false,
+      "created": "2024-11-05 23:23:23"
+    },
+    {
+      "sender": "User3",
+      "message": "sdsd"
+    }
+  ],
+  "general2": [
+    {
+      "sender": "User3",
+      "seed": 2,
+      "see": false,
+      "status": false,
+      "read": false,
+      "message": "Welcome to general2",
+      "created": "2024-11-05 23:23:23"
+    },
+    {
+      "sender": "User3",
+      "seed": 2,
+      "see": false,
+      "status": false,
+      "read": false,
+      "message": "sdsd",
+      "created": "2024-11-05 23:23:23"
+    }
+  ]
+}

@@ -4,30 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat - User 1</title>
+    <style>
+        #chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+        }
+        .message {
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 10px;
+            max-width: 70%;
+            clear: both;
+        }
+        .left {
+            background-color: #e0e0e0;
+            float: left;
+            text-align: left;
+        }
+        .right {
+            background-color: #cce5ff;
+            float: right;
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
     <h1>Chat as User 1</h1>
-    <div id="chat-box" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll;">
+    <div id="chat-box">
         <p><em>Connecting to chat...</em></p>
     </div>
     <input type="text" id="message-input" placeholder="Type a message">
     <button onclick="sendMessage()">Send</button>
 
     <script>
-        const ws = new WebSocket('ws://35.240.191.228:8080'); 
-
+        const ws = new WebSocket('ws://localhost:8080'); 
         ws.onopen = () => {
             console.log('Connected to WebSocket server as User 1');
-            appendMessage('Connected as User 1');
+            appendMessage('<em>Connected as User 1</em>', 'left');
+
+            const joinMessage = { type: 'join', channel_id: 'slug-1', sender: '1' };
+            ws.send(JSON.stringify(joinMessage));
         };
 
         ws.onmessage = (event) => {
-            const { sender, message } = JSON.parse(event.data);
-            appendMessage(`${sender}: ${message}`);
+            const data = JSON.parse(event.data);
+
+            // Load chat history
+            if (data.history) {
+                appendMessage('<em>Chat history loaded:</em>', 'left');
+                data.history.forEach((msg) => {
+                    const alignment = msg.seed === 1 ? 'left' : 'right';
+                    appendMessage(`${msg.sender}: ${msg.message}`, alignment);
+                });
+                return;
+            }
+
+
+            if (data.sender && data.message) {
+                const alignment = data.seed === 1 ? 'left' : 'right';
+                appendMessage(`${data.sender}: ${data.message}`, alignment);
+            }
+
+        
+            if (data.error) {
+                appendMessage(`<em>${data.error}</em>`, 'left');
+            }
         };
 
         ws.onclose = () => {
-            appendMessage('<em>Disconnected from WebSocket server</em>');
+            appendMessage('<em>Disconnected from WebSocket server</em>', 'left');
         };
 
         function sendMessage() {
@@ -35,19 +82,19 @@
             const message = messageInput.value;
 
             if (message.trim()) {
-                const data = { channel_id: 'general', sender: 'User1', message };
+                const data = { channel_id: 'slug-1', sender: '1', message, seed: 1 };
                 ws.send(JSON.stringify(data));
-        
                 messageInput.value = '';
             }
         }
 
-        function appendMessage(message) {
+        function appendMessage(message, alignment) {
             const chatBox = document.getElementById('chat-box');
             const newMessage = document.createElement('p');
+            newMessage.className = `message ${alignment}`;
             newMessage.innerHTML = message;
             chatBox.appendChild(newMessage);
-            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight; 
         }
     </script>
 </body>
