@@ -28,7 +28,7 @@ async function loadChannelsFromAPI() {
 }
 
 // Function to periodically refresh channels data
-function startChannelsDataRefresh(interval = 60000) {
+function startChannelsDataRefresh(interval = 5000) {
     loadChannelsFromAPI(); // Initial load
     setInterval(loadChannelsFromAPI, interval); // Reload every `interval` ms
 }
@@ -96,6 +96,8 @@ wss.on('connection', (ws) => {
     ws.on('message', async (data) => {
         try {
             const parsedData = JSON.parse(data);
+            console.log(parsedData);
+            
             const { channel_id, sender, message, type, seed } = parsedData;
 
             if (type === 'join') {

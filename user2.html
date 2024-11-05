@@ -44,7 +44,7 @@
             console.log('Connected to WebSocket server as User 2');
             appendMessage('<em>Connected as User 2</em>', 'left');
 
-            const joinMessage = { type: 'join', channel_id: 'person-672a902e39dfb-1730842670', sender: '133' };
+            const joinMessage = { type: 'join', channel_id: 'person-672a9312b765c-1730843410', sender: '133' };
             ws.send(JSON.stringify(joinMessage));
         };
 
@@ -82,7 +82,7 @@
             const message = messageInput.value;
 
             if (message.trim()) {
-                const data = { channel_id: 'person-672a902e39dfb-1730842670', sender: '133', message, seed: 2 }; 
+                const data = { channel_id: 'person-672a9312b765c-1730843410', sender: '133', message, seed: 2 }; 
                 ws.send(JSON.stringify(data));
                 messageInput.value = '';
             }
