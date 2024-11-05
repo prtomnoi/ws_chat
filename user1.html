@@ -44,13 +44,14 @@
             console.log('Connected to WebSocket server as User 1');
             appendMessage('<em>Connected as User 1</em>', 'left');
 
-            const joinMessage = { type: 'join', channel_id: 'slug-1', sender: '1' };
+            const joinMessage = { type: 'join', channel_id: 'slug-2', sender: '' };
             ws.send(JSON.stringify(joinMessage));
         };
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
-
+            console.log(data);
+            
             // Load chat history
             if (data.history) {
                 appendMessage('<em>Chat history loaded:</em>', 'left');
