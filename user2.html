@@ -39,51 +39,79 @@
     <button onclick="sendMessage()">Send</button>
 
     <script>
-        const ws = new WebSocket('wss://wss.dekesandev.com'); 
-        ws.onopen = () => {
-            console.log('Connected to WebSocket server as User 2');
-            appendMessage('<em>Connected as User 2</em>', 'left');
+        let ws;
+        let isReconnecting = false;
+        let messageQueue = [];
 
-            const joinMessage = { type: 'join', channel_id: 'person-672a9312b765c-1730843410', sender: '133' };
-            ws.send(JSON.stringify(joinMessage));
-        };
+        function connectWebSocket() {
+            ws = new WebSocket('wss://wss.dekesandev.com'); 
 
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
+            ws.onopen = () => {
+                console.log('Connected to WebSocket server as User 2');
+                appendMessage('<em>Connected as User 2</em>', 'left');
 
-            // Load chat history
-            if (data.history) {
-                appendMessage('<em>Chat history loaded:</em>', 'left');
-                data.history.forEach((msg) => {
-                    const alignment = msg.seed === 1 ? 'left' : 'right';
-                    appendMessage(`${msg.sender}: ${msg.message}`, alignment);
-                });
-                return;
-            }
+                const joinMessage = { type: 'join', channel_id: 'person-672b460d16dd8-1730889229', sender: '2' };
+                ws.send(JSON.stringify(joinMessage));
 
- 
-            if (data.sender && data.message) {
-                const alignment = data.seed === 1 ? 'left' : 'right';
-                appendMessage(`${data.sender}: ${data.message}`, alignment);
-            }
+                messageQueue.forEach(msg => ws.send(JSON.stringify(msg)));
+                messageQueue = []; 
+                isReconnecting = false;
+            };
 
-        
-            if (data.error) {
-                appendMessage(`<em>${data.error}</em>`, 'left');
-            }
-        };
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
 
-        ws.onclose = () => {
-            appendMessage('<em>Disconnected from WebSocket server</em>', 'left');
-        };
+                if (data.history) {
+                    appendMessage('<em>Chat history loaded:</em>', 'left');
+                    data.history.forEach((msg) => {
+                        const alignment = msg.seed === 1 ? 'left' : 'right';
+                        appendMessage(`${msg.sender}: ${msg.message}`, alignment);
+                    });
+                    return;
+                }
+
+                if (data.sender && data.message) {
+                    const alignment = data.seed === 1 ? 'left' : 'right';
+                    appendMessage(`${data.sender}: ${data.message}`, alignment);
+                }
+
+                if (data.error) {
+                    appendMessage(`<em>${data.error}</em>`, 'left');
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+
+            ws.onclose = () => {
+                appendMessage('<em>Disconnected from WebSocket server</em>', 'left');
+                isReconnecting = false;
+            };
+        }
+
+        connectWebSocket();
 
         function sendMessage() {
             const messageInput = document.getElementById('message-input');
             const message = messageInput.value;
 
             if (message.trim()) {
-                const data = { channel_id: 'person-672a9312b765c-1730843410', sender: '133', message, seed: 2 }; 
-                ws.send(JSON.stringify(data));
+                const data = { channel_id: 'person-672b460d16dd8-1730889229', sender: '2', message, seed: 1 };
+
+                // Check WebSocket connection before sending
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify(data));
+                } else {
+            
+                    messageQueue.push(data);
+
+                    if (!isReconnecting) {
+                        isReconnecting = true;
+                        connectWebSocket(); // Reconnect only when sending message
+                    }
+                }
+
                 messageInput.value = '';
             }
         }

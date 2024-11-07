@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        const ws = new WebSocket('ws://localhost:8081');
+
+        ws.onopen = () => {
+            console.log('Connected to notification WebSocket');
+            
+            // Send a request with sessions and userId
+            ws.send(JSON.stringify({
+                sessions: 'user',
+                usersId: '69'
+            }));
+        };
+
+        ws.onmessage = (event) => {
+            const response = JSON.parse(event.data);
+            if (response.success) {
+                console.log('Received notification data:', response.data);
+            } else {
+                console.error('Error:', response.error);
+            }
+        };
+
+        ws.onclose = () => {
+            console.log('Disconnected from notification WebSocket');
+        };
+
+    </script>
+</body>
+</html>
