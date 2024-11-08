@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const axios = require('axios');
 
 const NOTIFICATION_PORT = 8081;
-const EXTERNAL_API_URL = 'https://cleanmate.app/api/socket/notify';
+const EXTERNAL_API_URL = 'https://cleanmate.dekesandev.com/api/socket/notify';
 
 // Set up WebSocket server
 const wss = new WebSocket.Server({ port: NOTIFICATION_PORT });

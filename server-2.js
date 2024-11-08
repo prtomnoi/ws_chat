@@ -1,9 +1,9 @@
 const WebSocket = require('ws');
 const axios = require('axios');
 
-const CHANNELS_API_URL = 'https://cleanmate.app/api/chat/mathChat';
-const CHAT_HISTORY_API_URL = 'https://cleanmate.app/api/chat/ChannelById/';
-const SEND_MESSAGE_API_URL = 'https://cleanmate.app/api/chat/sendMessage';
+const CHANNELS_API_URL = 'https://cleanmate.dekesandev.com/api/chat/mathChat';
+const CHAT_HISTORY_API_URL = 'https://cleanmate.dekesandev.com/api/chat/ChannelById/';
+const SEND_MESSAGE_API_URL = 'https://cleanmate.dekesandev.com/api/chat/sendMessage';
 
 let channelsData = {}; // Store channels data after loading from API
 
