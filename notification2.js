@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 const axios = require('axios');
 
-const NOTIFICATION_PORT = 8081;
+const NOTIFICATION_PORT = 8082;
 const EXTERNAL_API_URL = 'https://cleanmate.dekesandev.com/api/socket/notify';
 
 // Set up WebSocket server

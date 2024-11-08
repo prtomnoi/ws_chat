@@ -84,8 +84,8 @@ async function saveMessageToAPI(user_id, chat_channel_id, message, seed) {
 const userConnections = {};
 
 // Initialize WebSocket server
-const wss = new WebSocket.Server({ port: 8080 });
-console.log('WebSocket server running on ws://localhost:8080');
+const wss = new WebSocket.Server({ port: 8083 });
+console.log('WebSocket server running on ws://localhost:8083');
 
 // Start the periodic refresh for channels data
 startChannelsDataRefresh(); // Refresh channels data every minute
