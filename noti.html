@@ -7,30 +7,28 @@
 </head>
 <body>
     <script>
-        const ws = new WebSocket('wss://noti.dekesandev.com');
+    const ws = new WebSocket('ws://localhost:8082');
 
-        ws.onopen = () => {
-            console.log('Connected to notification WebSocket');
-            
-            // Send a request with sessions and userId
-            ws.send(JSON.stringify({
-                sessions: 'user',
-                usersId: '69'
-            }));
-        };
+    ws.onopen = () => {
+        console.log('Connected as User 99');
 
-        ws.onmessage = (event) => {
-            const response = JSON.parse(event.data);
-            if (response.success) {
-                console.log('Received notification data:', response.data);
-            } else {
-                console.error('Error:', response.error);
-            }
-        };
+        // Register with user session
+        ws.send(JSON.stringify({
+            sessions: 'user',
+            usersId: '99'  // Register as userId 123
+        }));
+    };
 
-        ws.onclose = () => {
-            console.log('Disconnected from notification WebSocket');
-        };
+    ws.onmessage = (event) => {
+        const response = JSON.parse(event.data);
+        if (response.success) {
+            console.log('Received targeted notification data:', response.data);
+        }
+    };
+
+    ws.onclose = () => {
+        console.log('Disconnected from WebSocket');
+    };
 
     </script>
 </body>

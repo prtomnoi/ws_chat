@@ -35,9 +35,9 @@
     <button onclick="sendMessage()">Send</button>
 
     <script>
-        const userBId = "userA";
-        const targetUserId = "userB"; 
-        const ws = new WebSocket('ws://localhost:8084');
+        const userBId = "2";
+        const targetUserId = "1"; 
+        const ws = new WebSocket('wss://rider.dekesandev.com');
 
         ws.onopen = () => {
             console.log(`Connected to WebSocket as ${userBId}`);
@@ -46,18 +46,13 @@
                 usersId: userBId,
             }));
             
-            sendMessageToUser("Hello from User B!", 34.0522, -118.2437, targetUserId);
+            sendMessageToUser("Hello from User B!", 39.0522, 118.2437, targetUserId);
         };
 
         ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
-
-
-            if (message.from === targetUserId) {
-                displayMessage(`From ${message.from}: ${message.text} (Lat: ${message.latitude}, Long: ${message.longitude})`, "received");
-            } else if (message.from === userBId) {
-                displayMessage(`You: ${message.text} (Lat: ${message.latitude}, Long: ${message.longitude})`, "sent");
-            }
+            console.log(message);
+           
         };
 
         function sendMessageToUser(text, latitude, longitude, targetId) {
@@ -69,7 +64,7 @@
                     latitude: latitude,
                     longitude: longitude
                 }));
-                displayMessage(`You: ${text} (Lat: ${latitude}, Long: ${longitude})`, "sent");
+             
                 console.log(`Sent message to ${targetId}: ${text} (Lat: ${latitude}, Long: ${longitude})`);
             } else {
                 console.log("WebSocket connection is not open.");
@@ -77,14 +72,6 @@
         }
 
 
-        function displayMessage(text, type) {
-            const chatBox = document.getElementById("chat-box");
-            const messageElement = document.createElement("div");
-            messageElement.className = `message ${type}`;
-            messageElement.textContent = text;
-            chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight; 
-        }
     </script>
 </body>
 </html>

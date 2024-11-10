@@ -8,39 +8,49 @@ const EXTERNAL_API_URL = 'https://cleanmate.dekesandev.com/api/socket/notify';
 const wss = new WebSocket.Server({ port: NOTIFICATION_PORT });
 console.log(`Notification WebSocket server running on ws://localhost:${NOTIFICATION_PORT}`);
 
-// In-memory variables for sessions and usersId (you may replace with dynamic values as needed)
-let defaultSessions = 'admin,user';
-let defaultUsersId = '123';
 
-// Handle incoming WebSocket connections
+const clients = {};
+const defaultSessions = 0;
+
 wss.on('connection', (ws) => {
     console.log('New client connected to notification WebSocket');
 
-    // Listen for registration messages to update sessions and usersId if needed
-    ws.on('message', (data) => {
+    ws.on('message', async (data) => {
         try {
             const message = JSON.parse(data);
-            const { sessions, usersId } = message;
+            const { sessions, usersId, triggerTargetId } = message;
+
 
             if (sessions && usersId) {
-                // Update default sessions and usersId if received from the client
-                defaultSessions = sessions;
-                defaultUsersId = usersId;
-                console.log(`Updated sessions: ${sessions} and usersId: ${usersId}`);
+                clients[usersId] = ws;  
+                console.log(`Registered client with sessions: ${sessions} and usersId: ${usersId}`);
+            }
+
+       
+            if (sessions === 'admin' && triggerTargetId) {
+                console.log(`Admin triggered data fetch for userId: ${triggerTargetId}`);
+     
+                await fetchAndBroadcastData(triggerTargetId);
             }
         } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
+            console.error('Error processing WebSocket message:', error);
             ws.send(JSON.stringify({ success: false, error: "Failed to process request" }));
         }
     });
 
-    // Handle disconnection
     ws.on('close', () => {
         console.log('Client disconnected from notification WebSocket');
+
+        for (const userId in clients) {
+            if (clients[userId] === ws) {
+                delete clients[userId];
+                console.log(`Removed client with userId: ${userId}`);
+                break;
+            }
+        }
     });
 });
 
-// Function to call the external API with sessions and usersId
 async function callExternalApi(sessions, usersId) {
     try {
         const response = await axios.post(EXTERNAL_API_URL, {
@@ -61,23 +71,25 @@ async function callExternalApi(sessions, usersId) {
     }
 }
 
-// Function to broadcast data to all connected clients
-function broadcastData(data) {
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({ success: true, data }));
-        }
-    });
-}
 
-// Function to periodically fetch and broadcast data every 3 seconds
-async function fetchAndBroadcastData() {
-    const data = await callExternalApi(defaultSessions, defaultUsersId);
-    if (data) {
-        console.log('Broadcasting data to clients:', data);
-        broadcastData(data);
+function broadcastDataToUser(data, userId) {
+    const client = clients[userId];
+    if (client && client.readyState === WebSocket.OPEN) {
+        console.log(`Sending data to userId: ${userId}`);
+        client.send(JSON.stringify({ success: true, data }));
+    } else {
+        console.log(`UserId ${userId} is not connected.`);
     }
 }
 
-// Start periodic broadcast every 3 seconds
-setInterval(fetchAndBroadcastData, 5000); // 3000 ms = 3 seconds
+
+async function fetchAndBroadcastData(userId) {
+    console.log('Fetching data from API for broadcast...');
+    const data = await callExternalApi(defaultSessions, userId);  
+    if (data) {
+        console.log(`Data fetched successfully, broadcasting to userId: ${userId}`);
+        broadcastDataToUser(data, userId);
+    } else {
+        console.error('No data to broadcast.');
+    }
+}

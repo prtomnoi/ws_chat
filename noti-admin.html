@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+     const ws = new WebSocket('ws://localhost:8082');
+
+        ws.onopen = () => {
+            console.log('Connected as Admin');
+
+            // Register admin session and send trigger with target userId
+            ws.send(JSON.stringify({
+                sessions: 'admin',
+                usersId: 'admin',
+                triggerTargetId: '123'  // Target user ID to receive the data
+            }));
+        };
+
+        ws.onmessage = (event) => {
+            const response = JSON.parse(event.data);
+            if (response.success) {
+                console.log('Received notification data:', response.data);
+            } else {
+                console.error('Error:', response.error);
+            }
+        };
+
+        ws.onclose = () => {
+            console.log('Disconnected from WebSocket');
+        };
+
+
+    </script>
+</body>
+</html>
