@@ -8,9 +8,8 @@ const EXTERNAL_API_URL = 'https://cleanmate.dekesandev.com/api/socket/notify';
 const wss = new WebSocket.Server({ port: NOTIFICATION_PORT });
 console.log(`Notification WebSocket server running on ws://localhost:${NOTIFICATION_PORT}`);
 
-
 const clients = {};
-const defaultSessions = 0;
+const defaultSessions = 'user';
 
 wss.on('connection', (ws) => {
     console.log('New client connected to notification WebSocket');
@@ -18,20 +17,23 @@ wss.on('connection', (ws) => {
     ws.on('message', async (data) => {
         try {
             const message = JSON.parse(data);
-            const { sessions, usersId, triggerTargetId } = message;
-
+            const { sessions, usersId, triggerTargetId, text } = message;
 
             if (sessions && usersId) {
                 clients[usersId] = ws;  
                 console.log(`Registered client with sessions: ${sessions} and usersId: ${usersId}`);
             }
 
-       
             if (sessions === 'admin' && triggerTargetId) {
                 console.log(`Admin triggered data fetch for userId: ${triggerTargetId}`);
-     
                 await fetchAndBroadcastData(triggerTargetId);
             }
+
+            if (triggerTargetId && text) {
+                console.log(`Direct message from ${usersId} to ${triggerTargetId}: ${text}`);
+                sendMessageToUser(text, usersId, triggerTargetId);
+            }
+
         } catch (error) {
             console.error('Error processing WebSocket message:', error);
             ws.send(JSON.stringify({ success: false, error: "Failed to process request" }));
@@ -51,6 +53,7 @@ wss.on('connection', (ws) => {
     });
 });
 
+
 async function callExternalApi(sessions, usersId) {
     try {
         const response = await axios.post(EXTERNAL_API_URL, {
@@ -68,6 +71,22 @@ async function callExternalApi(sessions, usersId) {
     } catch (error) {
         console.error('Error calling external API:', error);
         return null;
+    }
+}
+
+
+function sendMessageToUser(text, senderId, targetUserId) {
+    const targetClient = clients[targetUserId];
+    if (targetClient && targetClient.readyState === WebSocket.OPEN) {
+        const message = {
+            success: true,
+            from: senderId,
+            message: text
+        };
+        targetClient.send(JSON.stringify(message));
+        console.log(`Message sent to user ${targetUserId} from ${senderId}: ${text}`);
+    } else {
+        console.log(`UserId ${targetUserId} is not connected.`);
     }
 }
 
