@@ -15,8 +15,7 @@
 
         ws.onopen = () => {
             console.log('Connected as User 69');
-            
-            // Register user 69
+
             ws.send(JSON.stringify({
                 sessions: 'user',
                 usersId: '69'  
@@ -26,7 +25,7 @@
         ws.onmessage = (event) => {
             const response = JSON.parse(event.data);
             if (response.success) {
-                console.log(`Message from ${response.from}:`, response.message);
+                console.log(`Message from ${response}:`, response.message);
             }
         };
 
