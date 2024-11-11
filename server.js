@@ -28,7 +28,7 @@ async function loadChannelsFromAPI() {
 }
 
 // Function to periodically refresh channels data
-function startChannelsDataRefresh(interval = 10000) {
+function startChannelsDataRefresh(interval = 5000) {
     loadChannelsFromAPI(); // Initial load
     setInterval(loadChannelsFromAPI, interval); // Reload every `interval` ms
 }

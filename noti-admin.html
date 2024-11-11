@@ -7,16 +7,14 @@
 </head>
 <body>
     <script>
-     const ws = new WebSocket('ws://localhost:8082');
+     const ws = new WebSocket('wss://noti.dekesandev.com');
 
         ws.onopen = () => {
             console.log('Connected as Admin');
-
-            // Register admin session and send trigger with target userId
             ws.send(JSON.stringify({
                 sessions: 'admin',
-                usersId: 'admin',
-                triggerTargetId: '123'  // Target user ID to receive the data
+                usersId: '0',
+                triggerTargetId: '69' 
             }));
         };
 

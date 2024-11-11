@@ -7,15 +7,14 @@
 </head>
 <body>
     <script>
-    const ws = new WebSocket('ws://localhost:8082');
+    const ws = new WebSocket('wss://noti.dekesandev.com');
 
     ws.onopen = () => {
-        console.log('Connected as User 99');
+        console.log('Connected as User 69');
 
-        // Register with user session
         ws.send(JSON.stringify({
             sessions: 'user',
-            usersId: '99'  // Register as userId 123
+            usersId: '69'  
         }));
     };
 
