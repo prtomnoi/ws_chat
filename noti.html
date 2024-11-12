@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User 69 </title>
+    <title>User 69 Chat</title>
 </head>
 <body>
     <h1>User 69</h1>
@@ -15,17 +15,17 @@
 
         ws.onopen = () => {
             console.log('Connected as User 69');
-
+            // Register user 69
             ws.send(JSON.stringify({
                 sessions: 'user',
-                usersId: '69'  
+                usersId: '69'
             }));
         };
 
         ws.onmessage = (event) => {
             const response = JSON.parse(event.data);
             if (response.success) {
-                console.log(`Message from ${response}:`, response.message);
+                console.log(`Message from ${response.from}:`, response.message);
             }
         };
 
@@ -39,12 +39,12 @@
 
             if (text.trim()) {
                 ws.send(JSON.stringify({
-                    usersId: '69',       
-                    targetUserId: 'admin', 
-                    text: text          
+                    usersId: '69',         
+                    targetUserId: '0',
+                    text: text           
                 }));
                 console.log(`Sent message to admin: ${text}`);
-                messageInput.value = '';
+                messageInput.value = ''; 
             }
         }
     </script>
