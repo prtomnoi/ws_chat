@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Client</title>
+</head>
+<body>
+    <script>
+        const userId = 2;
+        const ws = new WebSocket('ws://localhost:8085');
+
+        ws.onopen = () => {
+            console.log('Connected to WebSocket server');
+            const targetUserId = 1;
+            const message = "ORDER-0000134";
+
+            if (targetUserId && message) {
+                ws.send(JSON.stringify({
+                    userId,
+                    targetUserId,
+                    text: message,
+                }));
+                console.log(`connecting user :  ${userId}`);
+            } else {
+                alert('Please enter both Target User ID and Message');
+            }
+        };
+
+        ws.onmessage = (event) => {
+            const response = JSON.parse(event.data);
+            if (response.success) {
+                console.log(`Message from ${response.from}: ${response.message}`);
+            } else {
+                console.error('Error:', response.error);
+            }
+        };
+
+        ws.onclose = () => {
+            console.log('Disconnected from WebSocket server');
+        };
+
+  
+    </script>
+</body>
+</html>
