@@ -6,47 +6,32 @@
     <title>User 69 Chat</title>
 </head>
 <body>
-    <h1>User 69</h1>
+    <h1>User 187</h1>
     <input type="text" id="message-input" placeholder="Type a message to admin">
     <button onclick="sendMessageToAdmin()">Send to Admin</button>
 
     <script>
-        const ws = new WebSocket('wss://noti.dekesandev.com');
+    const ws = new WebSocket('wss://noti.dekesandev.com');
 
         ws.onopen = () => {
-            console.log('Connected as User 69');
-            // Register user 69
+            console.log('Connected as User 187');
+
             ws.send(JSON.stringify({
                 sessions: 'user',
-                usersId: '69'
+                usersId: '187'  
             }));
         };
 
         ws.onmessage = (event) => {
             const response = JSON.parse(event.data);
             if (response.success) {
-                console.log(`Message from ${response.from}:`, response.message);
+                console.log('Received targeted notification data:', response.data);
             }
         };
 
         ws.onclose = () => {
             console.log('Disconnected from WebSocket');
         };
-
-        function sendMessageToAdmin() {
-            const messageInput = document.getElementById("message-input");
-            const text = messageInput.value;
-
-            if (text.trim()) {
-                ws.send(JSON.stringify({
-                    usersId: '69',         
-                    targetUserId: '0',
-                    text: text           
-                }));
-                console.log(`Sent message to admin: ${text}`);
-                messageInput.value = ''; 
-            }
-        }
     </script>
 </body>
 </html>
