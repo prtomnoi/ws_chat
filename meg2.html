@@ -5,25 +5,15 @@
     <title>WebSocket Client</title>
 </head>
 <body>
+    <h1>WebSocket Client</h1>
     <script>
-        const userId = 1;
+        const userId = 2; // User ID for this client
         const ws = new WebSocket('wss://order.dekesandev.com');
 
         ws.onopen = () => {
             console.log('Connected to WebSocket server');
-            const targetUserId = 2;
-            const message = "ORDER-0000135";
-
-            if (targetUserId && message) {
-                ws.send(JSON.stringify({
-                    userId,
-                    targetUserId,
-                    text: message,
-                }));
-                console.log(`connecting user :  ${userId}`);
-            } else {
-                alert('Please enter both Target User ID and Message');
-            }
+            ws.send(JSON.stringify({ userId })); // Register with the server
+                sendMessage();
         };
 
         ws.onmessage = (event) => {
@@ -39,7 +29,23 @@
             console.log('Disconnected from WebSocket server');
         };
 
-      
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        function sendMessage() {
+            const targetUserId = 1; // Example: send message to user ID 2
+            const message = 'Test message from user 1';
+
+            ws.send(
+                JSON.stringify({
+                    userId,
+                    targetUserId,
+                    text: message,
+                })
+            );
+            console.log(`Sent message to ${targetUserId}: ${message}`);
+        }
     </script>
 </body>
 </html>
