@@ -4,12 +4,17 @@ const PORT = 8085;
 const wss = new WebSocket.Server({ port: PORT });
 console.log(`WebSocket server running on ws://localhost:${PORT}`);
 
-// Object to store connected clients with their userIds
+// Object to store connected clients by user ID
 const clients = {};
 
 // Handle new client connections
 wss.on('connection', (ws) => {
     console.log('New client connected');
+    ws.isAlive = true; // Mark the connection as alive
+
+    ws.on('pong', () => {
+        ws.isAlive = true; // Confirm the connection is still alive
+    });
 
     // Listen for messages from clients
     ws.on('message', (data) => {
@@ -18,7 +23,7 @@ wss.on('connection', (ws) => {
             const { userId, targetUserId, text } = message;
 
             // Register client with userId
-            if (userId) {
+            if (userId && !text) {
                 clients[userId] = ws;
                 console.log(`User ${userId} registered`);
             }
@@ -60,3 +65,16 @@ function sendMessageToUser(senderId, receiverId, text) {
         console.log(`User ${receiverId} is not connected`);
     }
 }
+
+// Periodically check for inactive connections and terminate them
+setInterval(() => {
+    wss.clients.forEach((ws) => {
+        if (!ws.isAlive) {
+            console.log('Terminating inactive connection');
+            return ws.terminate();
+        }
+
+        ws.isAlive = false;
+        ws.ping(); // Send a ping to check if the client is alive
+    });
+}, 30000); // Check every 30 seconds

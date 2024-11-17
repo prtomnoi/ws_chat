@@ -7,7 +7,7 @@
 <body>
     <script>
         const userId = 1;
-        const ws = new WebSocket('ws://localhost:8085');
+        const ws = new WebSocket('wss://order.dekesandev.com');
 
         ws.onopen = () => {
             console.log('Connected to WebSocket server');
