@@ -1,37 +1,11 @@
 const WebSocket = require('ws');
 const axios = require('axios');
 
-const CHANNELS_API_URL = 'https://cleanmate.dekesandev.com/api/chat/mathChat';
 const CHAT_HISTORY_API_URL = 'https://cleanmate.dekesandev.com/api/chat/ChannelById/';
 const SEND_MESSAGE_API_URL = 'https://cleanmate.dekesandev.com/api/chat/sendMessage';
 
-let channelsData = {}; // Store channels data after loading from API
-
-// Function to load channels data from the API
-async function loadChannelsFromAPI() {
-    try {
-        const response = await axios.get(CHANNELS_API_URL);
-        if (response.data.status === 200 && response.data.channels) {
-            channelsData = Object.fromEntries(
-                Object.entries(response.data.channels).map(([channel, users]) => [
-                    channel,
-                    users.map(String),
-                ])
-            );
-            console.log('Channels data updated from API:', channelsData);
-        } else {
-            console.error('Failed to load channels data from API.');
-        }
-    } catch (error) {
-        console.error('Error fetching channels data from API:', error);
-    }
-}
-
-// Function to periodically refresh channels data
-function startChannelsDataRefresh(interval = 10000) {
-    loadChannelsFromAPI(); // Initial load
-    setInterval(loadChannelsFromAPI, interval); // Reload every `interval` ms
-}
+// Store users by channel ID
+const channelUsers = {};
 
 // Function to load chat history for a specific channel from the API
 async function loadChatHistoryByChannelId(channel_id) {
@@ -84,11 +58,8 @@ async function saveMessageToAPI(user_id, chat_channel_id, message, seed) {
 const userConnections = {};
 
 // Initialize WebSocket server
-const wss = new WebSocket.Server({ port: 8083 });
-console.log('WebSocket server running on ws://localhost:8083');
-
-// Start the periodic refresh for channels data
-startChannelsDataRefresh(); // Refresh channels data every minute
+const wss = new WebSocket.Server({ port: 8080 });
+console.log('WebSocket server running on ws://localhost:8080');
 
 wss.on('connection', (ws) => {
     console.log('New client connected');
@@ -97,47 +68,40 @@ wss.on('connection', (ws) => {
         try {
             const parsedData = JSON.parse(data);
             console.log(parsedData);
-            
+
             const { channel_id, sender, message, type, seed } = parsedData;
 
             if (type === 'join') {
-                if (!channelsData[channel_id]) {
-                    ws.send(JSON.stringify({ error: `Channel '${channel_id}' not found` }));
-                    return;
-                }
-
-                // Register the sender's connection
+                // Register the user's connection
                 userConnections[sender] = ws;
 
-                // Check if the sender is allowed in the channel
-                if (!channelsData[channel_id].includes(String(sender))) {
-                    ws.send(JSON.stringify({ error: `User '${sender}' is not part of channel '${channel_id}'` }));
-                    return;
+                // Add user to the channel
+                if (!channelUsers[channel_id]) {
+                    channelUsers[channel_id] = new Set();
                 }
+                channelUsers[channel_id].add(sender);
 
-                // Fetch the latest chat history from the API for the specified channel
+                // Fetch and send chat history to the user
                 const history = await loadChatHistoryByChannelId(channel_id);
                 ws.send(JSON.stringify({ history }));
 
-                return; // Exit after sending history for "join" message
-            }
-
-            if (!channelsData[channel_id]) {
-                ws.send(JSON.stringify({ error: `Channel '${channel_id}' not found` }));
                 return;
-            }
+            }else {
 
-            // Broadcast the new message to all users in the same channel
-            const newMessage = { sender, message, seed };
-            channelsData[channel_id].forEach((user) => {
-                if (userConnections[user] && userConnections[user].readyState === WebSocket.OPEN) {
-                    userConnections[user].send(JSON.stringify({ channel_id, sender, message, seed }));
+            // if (type === 'message') {
+                // Broadcast the new message to all users in the same channel
+                const newMessage = { channel_id, sender, message, seed };
+                if (channelUsers[channel_id]) {
+                    channelUsers[channel_id].forEach(user => {
+                        if (userConnections[user] && userConnections[user].readyState === WebSocket.OPEN) {
+                            userConnections[user].send(JSON.stringify(newMessage));
+                        }
+                    });
                 }
-            });
 
-            // Save the message to the API
-            await saveMessageToAPI(sender, channel_id, message, seed || 1);
-
+                // Save the message to the API
+                await saveMessageToAPI(sender, channel_id, message, seed || 1);
+            }
         } catch (error) {
             console.error("Error processing message:", error);
             ws.send(JSON.stringify({ error: "Failed to process message" }));
@@ -147,9 +111,16 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         console.log('Client disconnected');
 
+        // Remove user from userConnections and channelUsers
         for (let user in userConnections) {
             if (userConnections[user] === ws) {
                 delete userConnections[user];
+                for (let channel in channelUsers) {
+                    channelUsers[channel].delete(user);
+                    if (channelUsers[channel].size === 0) {
+                        delete channelUsers[channel];
+                    }
+                }
                 break;
             }
         }

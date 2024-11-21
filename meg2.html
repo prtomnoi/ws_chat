@@ -7,12 +7,12 @@
 <body>
     <h1>WebSocket Client</h1>
     <script>
-        const userId = 2; // User ID for this client
+        const userId = 187; 
         const ws = new WebSocket('wss://order.dekesandev.com');
 
         ws.onopen = () => {
             console.log('Connected to WebSocket server');
-            ws.send(JSON.stringify({ userId })); // Register with the server
+            ws.send(JSON.stringify({ userId }));
                 sendMessage();
         };
 
@@ -34,7 +34,7 @@
         };
 
         function sendMessage() {
-            const targetUserId = 1; // Example: send message to user ID 2
+            const targetUserId = 1; 
             const message = 'Test message from user 1';
 
             ws.send(
