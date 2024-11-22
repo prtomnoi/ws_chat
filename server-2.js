@@ -58,8 +58,8 @@ async function saveMessageToAPI(user_id, chat_channel_id, message, seed) {
 const userConnections = {};
 
 // Initialize WebSocket server
-const wss = new WebSocket.Server({ port: 8080 });
-console.log('WebSocket server running on ws://localhost:8080');
+const wss = new WebSocket.Server({ port: 8081 });
+console.log('WebSocket server running on ws://localhost:8081');
 
 wss.on('connection', (ws) => {
     console.log('New client connected');
@@ -70,6 +70,12 @@ wss.on('connection', (ws) => {
             console.log(parsedData);
 
             const { channel_id, sender, message, type, seed } = parsedData;
+
+            if (!channel_id || !sender || !message || !type) {
+                console.error("Missing required properties in the received data.");
+                ws.send(JSON.stringify({ error: "Missing required properties." }));
+                return;
+            }
 
             if (type === 'join') {
                 // Register the user's connection

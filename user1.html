@@ -39,12 +39,12 @@
     <button onclick="sendMessage()">Send</button>
 
     <script>
-        const ws = new WebSocket('ws://localhost:8080'); 
+        const ws = new WebSocket('ws://localhost:8081'); 
         ws.onopen = () => {
             console.log('Connected to WebSocket server as User 1');
             appendMessage('<em>Connected as User 1</em>', 'left');
 
-            const joinMessage = { type: 'join', channel_id: 'person-6731cd5a47dbd-1731317082', sender: '159' };
+            const joinMessage = { type: 'join', channel_id: 'person-67386438c3f8e-1731748920', sender: '187' };
             ws.send(JSON.stringify(joinMessage));
         };
 
@@ -83,7 +83,7 @@
             const message = messageInput.value;
 
             if (message.trim()) {
-                const data = { channel_id: 'person-6731cd5a47dbd-1731317082', sender: '159', message, seed: 1 };
+                const data = { channel_id: 'person-67386438c3f8e-1731748920', sender: '187', message, seed: 2 };
                 ws.send(JSON.stringify(data));
                 messageInput.value = '';
             }
