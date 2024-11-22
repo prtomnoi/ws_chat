@@ -72,7 +72,7 @@ wss.on('connection', (ws) => {
             const { channel_id, sender, message, type, seed } = parsedData;
 
             if (!channel_id || !sender || !type) {
-                console.error(`Missing required properties in the received data.  channel_id : ${channel_id} and sender : ${sender} and message : ${type}`);
+                console.error(`Missing required properties in the received data.  channel_id : ${channel_id} and sender : ${sender} and type : ${type}`);
                 ws.send(JSON.stringify({ error: "Missing required properties." }));
                 return;
             }
