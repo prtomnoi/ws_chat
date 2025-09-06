@@ -118,53 +118,58 @@
         }
       };
 
-        ws.onmessage = (event) => {
+      ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log('[WS ←]', data);
 
-        if (data.event === 'batch' && Array.isArray(data.items)) {
-            const seed   = data.seed ?? CURRENT_SEED;
-            const sender = data.sender ?? CURRENT_USER_ID;
-            renderBatch(data.group_id, data.items, seed, sender);
-            return;
-        }
-
-        if (data.history) {
+       if (data.history) {
             appendSystem('<em>Chat history loaded</em>');
             data.history.forEach((msg) => {
-            if (msg.type === 'image_group' || msg.type2 === 'image_group') {
+
+                if (msg.type === 'image_group' || msg.type2 === 'image_group') {
                 const first = (msg.items && msg.items[0]) || {};
                 const seed   = first.seed   != null ? first.seed   : CURRENT_SEED;
                 const sender = first.sender != null ? first.sender : CURRENT_USER_ID;
+                // ใช้ group_id + items ที่ส่งมาจาก API
                 renderBatch(msg.group_id, msg.items || [], seed, sender);
                 return;
-            }
-            const alignment = inferAlignment(msg);
-            appendMessageObj({
+                }
+
+                const alignment = inferAlignment(msg);
+                appendMessageObj({
                 sender:  msg.sender,
                 type:    msg.type || 'text',
                 message: msg.message || null,
                 file_url: msg.file_url || null,
                 seed:    msg.seed
-            }, alignment);
+                }, alignment);
             });
             return;
-        }
+            }
 
+
+        if (data.event === 'batch' && Array.isArray(data.items)) {
+          const gid = data.group_id || 'group-' + Date.now();
+          renderBatch(gid, data.items, data.seed, data.sender);
+          return;
+        }
         if (data.sender && (data.message || data.file_url)) {
+          if (data.group_id) {
+            renderIntoGroup(data.group_id, data, data.seed, data.sender);
+          } else {
             const alignment = inferAlignment(data);
             appendMessageObj({
-            sender: data.sender,
-            type: data.type || 'text',
-            message: data.message || null,
-            file_url: data.file_url || null,
-            seed: data.seed
+              sender: data.sender,
+              type: data.type || 'text',
+              message: data.message || null,
+              file_url: data.file_url || null,
+              seed: data.seed
             }, alignment);
+          }
         }
 
-         if (data.error) appendSystem(`<em>${data.error}</em>`);
-        };
-
+        if (data.error) appendSystem(`<em>${data.error}</em>`);
+      };
 
       ws.onclose = () => {
         appendSystem('<em>Disconnected</em>');
